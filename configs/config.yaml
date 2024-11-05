@@ -1,0 +1,16 @@
+training:
+  batch_size: 32
+  epochs: 100000
+  learning_rate: 0.0002
+  betas:
+    - 0.5
+    - 0.999
+  alpha: 1.0
+
+paths:
+  train_dir: "F:/gan2/Anime-WGAN/dataset/tiny-imagenet-200/banana/images"
+  save_dir: "./generated_images"
+  checkpoint_dir: "./checkpoints"
+
+data:
+  resize: [64, 64]
