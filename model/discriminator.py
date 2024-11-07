@@ -24,7 +24,7 @@ class Discriminator(nn.Module):
         return self.model(x)
 
 # 损失函数
-def adversarial_loss(disc_real, disc_fake):
+def adversarial_loss(disc_real, disc_fake):  # 希望最小化这个损失
     errD_real = F.binary_cross_entropy(disc_real, torch.ones_like(disc_real)) # 判别器对水印真图像接近1，提取水印图接近0
     errD_fake = F.binary_cross_entropy(disc_fake, torch.zeros_like(disc_fake))
     errD = errD_real + errD_fake
