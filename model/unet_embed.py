@@ -20,7 +20,7 @@ class UNetEmbed(nn.Module):
         # SE 模块
         self.se = SEBlock(channel=8, reduction=16)
 
-        # 缩放路径
+        # encode
         self.contracting_path = nn.Sequential(
             nn.MaxPool2d(kernel_size=2),
             nn.Conv2d(in_channels + 8, 128, kernel_size=3, stride=1, padding=1), # 3+8
@@ -36,7 +36,7 @@ class UNetEmbed(nn.Module):
             nn.ReLU(),
         )
 
-        # 扩展路径
+        # decode
         self.expansive_path = nn.Sequential(
             nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
             nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1),

@@ -1,7 +1,7 @@
 import os
 import torch
 import torch.nn.functional as F
-import logging
+import shutil
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from model import *  
@@ -25,8 +25,8 @@ def train(epoch, embed_net, extract_net, discriminator, train_loader, embed_opti
         disc_real = discriminator(watermark)  # 判别真实水印图像
         disc_fake = discriminator(extracted.detach())  # 判别提取水印图像
 
-        errD_real = F.binary_cross_entropy(disc_real, torch.ones_like(disc_real)) # 判别器对水印真图像接近1，提取水印图接近0
-        errD_fake = F.binary_cross_entropy(disc_fake, torch.zeros_like(disc_fake))
+        errD_real = F.binary_cross_entropy(disc_real, torch.ones_like(disc_real)) # 判别器对水印误差
+        errD_fake = F.binary_cross_entropy(disc_fake, torch.zeros_like(disc_fake)) # 判别器对提取误差
         errD = errD_real + errD_fake
 
         d_optimizer.zero_grad()
@@ -46,7 +46,7 @@ def train(epoch, embed_net, extract_net, discriminator, train_loader, embed_opti
         loss_mse = F.mse_loss(embed, host)  # 嵌入图像与宿主图像之间的损失
         loss_mse_extract = F.mse_loss(watermark, extracted)  # 原水印与提取水印之间的损失
 
-        loss = loss_mse + alpha * loss_mse_extract + adv_loss  # 目标是最小化损失
+        loss = loss_mse + beta * loss_mse_extract + alpha * adv_loss    
         
         embed_optimizer.zero_grad()
         extract_optimizer.zero_grad()
@@ -55,18 +55,20 @@ def train(epoch, embed_net, extract_net, discriminator, train_loader, embed_opti
         extract_optimizer.step()
 
         # 保存图像
-        if i % 16 == 0:  
+        if i % 4 == 0:  
             save_all_images(embed, extracted, watermark, host, attacked, epoch, i, save_dir, train_loader, loss, loss_mse, loss_mse_extract, adv_loss)
 
     # 保存模型
-    if epoch % 10 == 0:
+    if epoch % 5 == 0:
         save_all_checkpoints(embed_net, extract_net, discriminator, embed_optimizer, extract_optimizer, d_optimizer, checkpoint_dir, epoch)
+
+
 
 
 def main():
     # 加载配置文件
-    setup_logging()
     config = load_config()
+    setup_logging()
     log_training_config(config)
 
     # 加载检查点
@@ -76,13 +78,13 @@ def main():
     start_epoch, embed_net, extract_net, discriminator, embed_optimizer, extract_optimizer, d_optimizer = reload(embed_net, extract_net, discriminator, embed_optimizer, extract_optimizer, d_optimizer, latest_checkpoint_path)
 
     # 加载数据集
-    host_dir = config['paths']['host_dir']
+    train_dir = config['paths']['train_dir']
     save_dir = config['paths']['save_dir']
-    watermark_dir = config['paths']['watermark_dir']
     os.makedirs(save_dir, exist_ok=True)
+    shutil.copy('./configs/config.yaml', os.path.join(save_dir, 'config.yaml'))
 
     resize = tuple(config['data']['resize'])
-    train_dataset = WatermarkDataset(root_dir=host_dir, watermark_dir=watermark_dir, transform=transforms.Compose([transforms.Resize(resize), transforms.ToTensor()]))
+    train_dataset = WatermarkDataset(root_dir=train_dir, transform=transforms.Compose([transforms.Resize(resize), transforms.ToTensor()]))
     train_loader = DataLoader(train_dataset, batch_size=config['training']['batch_size'], shuffle=True, num_workers=4)
 
     for epoch in range(start_epoch, config['training']['epochs'] + 1):
