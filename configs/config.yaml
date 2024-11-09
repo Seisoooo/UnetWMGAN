@@ -3,7 +3,7 @@ training:
   epochs: 100000
   embed_learning_rate: 0.0001
   extract_learning_rate: 0.0002
-  discriminator_learning_rate: 0.0001
+  discriminator_learning_rate: 0.0005
 
   betas:
     - 0.5
@@ -12,11 +12,9 @@ training:
   beta: 1.0
 
 paths:
-  train_dir: "F:/UnetWMGAN_final/UnetWMGAN/dataset/tiny-imagenet-200/train"
-  host_dir: "F:/UnetWMGAN_final/UnetWMGAN/dataset/tiny-imagenet-200/train/host"
-  watermark_dir: "F:/UnetWMGAN_final/UnetWMGAN/dataset/tiny-imagenet-200/train/watermark/images"
-  save_dir: "./generated_images/generated_images_alpha=1_watermark_appointed"
-  checkpoint_dir: "F:/UnetWMGAN_final/UnetWMGAN/checkpoints/checkpoints-alpha=1_host&watermark_appointed"
+  train_dir: "F:/UnetWMGAN_final/UnetWMGAN/dataset/tiny-imagenet-200/banana2/images"
+  save_dir: "./generated_images/alpha=0.1,beta=1.0_host&watermark_appointed_10x10000"
+  checkpoint_dir: "F:/UnetWMGAN_final/UnetWMGAN/checkpoints/checkpoints-alpha=0.1,beta=1.0_host&watermark_appointed_10x10000"
 
 data:
   resize: [64, 64]

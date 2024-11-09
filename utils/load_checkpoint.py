@@ -97,4 +97,6 @@ def reload(embed_net, extract_net, discriminator, embed_optimizer, extract_optim
             start_epoch = 1      
         else:
             print(f"已成功加载检查点：{latest_epoch}") 
+    else:
+        print("latest_checkpoint_path为空，重新初始化模型")
     return start_epoch, embed_net, extract_net, discriminator, embed_optimizer, extract_optimizer, d_optimizer

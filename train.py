@@ -40,8 +40,12 @@ def train(epoch, embed_net, extract_net, discriminator, train_loader, embed_opti
         # 三个参数分别对应三个目标：
         # 嵌入网络和提取网络的三个目标，1.原图像与嵌入水印图像的要相似 2.能否从载密图像中提取水印图像 3.提取的水印是能否混淆判别网络
 
-        disc_fake = discriminator(extracted)  # 判断提取水印是否真实
-        adv_loss = (1e-3) * F.binary_cross_entropy(disc_fake, torch.ones_like(disc_fake))  
+        disc_fake = discriminator(extracted)  
+        disc_real = discriminator(watermark)
+        disc_real = F.binary_cross_entropy(disc_real, torch.ones_like(disc_real)) # 判别器对水印误差
+        disc_fake = F.binary_cross_entropy(disc_fake, torch.zeros_like(disc_fake)) # 判别器对提取误差
+        errd = disc_real + disc_fake
+        adv_loss = (1e-3) * errd
 
         loss_mse = F.mse_loss(embed, host)  # 嵌入图像与宿主图像之间的损失
         loss_mse_extract = F.mse_loss(watermark, extracted)  # 原水印与提取水印之间的损失
